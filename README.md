@@ -3,8 +3,9 @@
 Com as recentes polêmicas sobre a apuração de resultados do primeiro turno da eleição de 2022, comecei a acompanhar os resultados
 em https://resultados.tse.jus.br, que oferece uma opção para baixar os boletins de urna (BU) individualmente. Numa conversa informal, surgiu a idéia de baixar em lote estes arquivos para fazermos análises.
 
-*IMPORTANTE:* Trata-se de um projeto EDUCACIONAL e sem fins políticos. Apenas vi um problema interessante e resolvi estudar como resolvê-lo. Não me responsabilizo pelo que for feito com estes dados, ou por informações incorretas. Use por sua conta e risco.
+**IMPORTANTE 1:** Trata-se de um projeto EDUCACIONAL e sem fins políticos. Apenas vi um problema interessante e resolvi estudar como resolvê-lo. Não me responsabilizo pelo que for feito com estes dados, ou por informações incorretas. Use por sua conta e risco.
 
+**IMPORTANTE 2:** Apesar de ter criado uma opção para baixar todas as UFs de uma vez, **NÃO FAÇA ISSO**. A quantidade de arquivos é **IMENSA** e pode causar problemas para os servidores do TSE. Se for baixar, baixe uma UF por vez!
 
 
 # Legal, como posso ajudar?
