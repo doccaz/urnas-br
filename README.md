@@ -85,18 +85,18 @@ URL de exemplo: https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/c
 
 onde:
 
-oficial = base de dados
-ele2022 = eleições de 2022
-arquivo-urna = ...
-406 = pleito (eleições gerais de 2022)
-config = ...
-ap = estado (Amapá)
-ap-p000406-cs.json = arquivo de dados
+- oficial = base de dados
+- ele2022 = eleições de 2022
+- arquivo-urna = ...
+- 406 = pleito (eleições gerais de 2022)
+- config = ...
+- ap = estado (Amapá)
+- ap-p000406-cs.json = arquivo de dados
 
 onde:
-ap = Amapá
-p000406 = pleito 406 (eleições gerais de 2022)
-cs = ?
+- ap = Amapá
+- p000406 = pleito 406 (eleições gerais de 2022)
+- cs = ?
 
 Para todos:
 ```
@@ -138,21 +138,22 @@ URL de exemplo: https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/d
 ----> a lista "hashes" pode conter mais de um registro de urna naquela seção
 
 
-* Breakdown dos parâmetros:
-406 = código do pleito ( o mesmo para o 1o turno pro BR inteiro?)
-ap = Amapá
-06050 = código do município (Macapá)
-0002 = zona eleitoral
-0824 = seção
+Breakdown dos parâmetros:
+
+- 406 = código do pleito ( o mesmo para o 1o turno pro BR inteiro?)
+- ap = Amapá
+- 06050 = código do município (Macapá)
+- 0002 = zona eleitoral
+- 0824 = seção
 
 
-nome do arquivo:
-p000406-ap-m06050-z0002-s0824-aux.json
-p000406 = pleito 406 (eleições gerais de 2022)
-ap = Amapá
-m06050 = município de Macapá
-z0002 = zona eleitoral 0002
-s0824 = seção 0824
+nome do arquivo: p000406-ap-m06050-z0002-s0824-aux.json
+
+- p000406 = pleito 406 (eleições gerais de 2022)
+- ap = Amapá
+- m06050 = município de Macapá
+- z0002 = zona eleitoral 0002
+- s0824 = seção 0824
 
 
 ## 4. Obter arquivos da cada urna
@@ -169,24 +170,25 @@ URL de exemplo: https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/d
 
 * Composição da URL:
 
-oficial = base de dados
-ele2022 = eleição
-arquivo-urna = tipo
-406 = pleito (406 para 1o. turno?)
-dados = ...
-ap = Amapá
-06050 = município de Macapá
-0002 = zona eleitoral
-0824 = seção
-534f753676357056516e4a42384e376c77544b32533257562b794a2d4968375a6e7a654f504b6746762b493d = hash obtido no arquivo -aux.json (SHA2?)
-o00406-0605000020824.logjez = nome do arquivo
+- oficial = base de dados
+- ele2022 = eleição
+- arquivo-urna = tipo
+- 406 = pleito (406 para 1o. turno?)
+- dados = ...
+- ap = Amapá
+- 06050 = município de Macapá
+- 0002 = zona eleitoral
+- 0824 = seção
+- 534f753676357056516e4a42384e376c77544b32533257562b794a2d4968375a6e7a654f504b6746762b493d = hash obtido no arquivo -aux.json (SHA2?)
+- o00406-0605000020824.logjez = nome do arquivo
+
 onde:
 
-o00406 = pleito
-06050 = município
-0002 = zona eleitoral
-0824 = seção
-.logjez = extensão
+- o00406 = pleito
+- 06050 = município
+- 0002 = zona eleitoral
+- 0824 = seção
+- .logjez = extensão
 
 
 Logo, neste caso é necessário baixar 5 URLs:
@@ -243,14 +245,14 @@ ap,6050,"MACAPÁ",00002,0001,205,NULO,2
 ```
 
 onde temos, na sequência:
-UF = estado onde se localiza a urna
-cod_municipio = código do TSE que identifica o município
-municipio = nome do município
-zona = a zona eleitoral à qual pertence a urna
-secao = seção eleitoral
-eleitores_aptos = quantidade de eleitores registrados e aptos a votar naquela seção
-candidato = número do candidato (não coloquei nome nem partido -- precisa?)
-quantidade_votos = quantidade de votos registrados para aquele candidato
+- UF = estado onde se localiza a urna
+- cod_municipio = código do TSE que identifica o município
+- municipio = nome do município
+- zona = a zona eleitoral à qual pertence a urna
+- secao = seção eleitoral
+- eleitores_aptos = quantidade de eleitores registrados e aptos a votar naquela seção
+- candidato = número do candidato (não coloquei nome nem partido -- precisa?)
+- quantidade_votos = quantidade de votos registrados para aquele candidato
 
 os votos brancos e nulos aparecem como um "candidato" também.
 
@@ -261,16 +263,17 @@ URL de exemplo: https://resultados.tse.jus.br/oficial/ele2022/546/dados-simplifi
 
 onde:
 
-oficial = base de dados
-ele2022 = eleições de 2022
-546 = eleição federal de 2022 (ver tópico 1)
-dados-simplificados = ...
-ap = estado (Amapá)
+- oficial = base de dados
+- ele2022 = eleições de 2022
+- 546 = eleição federal de 2022 (ver tópico 1)
+- dados-simplificados = ...
+- ap = estado (Amapá)
 
-ap-c0007-e000546-r.json = arquivo de candidatos
+nome do arquivo de candidatos: ap-c0007-e000546-r.json
+
 onde:
-ap = estado (Amapá)
-c0007 = cargo, de acordo com o ele-c.json (tópico 1)
+- ap = estado (Amapá)
+- c0007 = cargo, de acordo com o ele-c.json (tópico 1)
 ```
                {
                            "cd" : "7",
@@ -279,7 +282,7 @@ c0007 = cargo, de acordo com o ele-c.json (tópico 1)
                 }
 ```
 
-e000546 = eleição estadual, de acordo com ele-c.json (tópico 1)
+- e000546 = eleição estadual, de acordo com ele-c.json (tópico 1)
 ```
                "cd" : "546",
                "cdt2" : "547",
@@ -287,16 +290,16 @@ e000546 = eleição estadual, de acordo com ele-c.json (tópico 1)
                "t" : "1",
                "tp" : "1"
 ```
-r = resultados?m
+- r = resultados(?)
 
 Logo, para presidente no estado do Amapá:
 
-https://resultados.tse.jus.br/oficial/ele2022/544/dados-simplificados/ap/ap-c0001-e000544-r.json
+URL de exemplo: https://resultados.tse.jus.br/oficial/ele2022/544/dados-simplificados/ap/ap-c0001-e000544-r.json
 
 e nos resultados:
-vap = votos apurados (187621)
-pvap = percentual de votos apurados (43,41)
-pst = total de seções totalizadas (100)
+- vap = votos apurados (187621)
+- pvap = percentual de votos apurados (43,41)
+- pst = total de seções totalizadas (100)
 
 
 Para baixar de todos os estados:
