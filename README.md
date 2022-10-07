@@ -1,4 +1,4 @@
-* Sobre o projeto
+# Sobre o projeto 
 
 Com as recentes polêmicas sobre a apuração de resultados do primeiro turno da eleição de 2022, comecei a acompanhar os resultados
 em https://resultados.tse.jus.br, que oferece uma opção para baixar os boletins de urna (BU) individualmente. Numa conversa informal, surgiu a idéia de baixar em lote estes arquivos para fazermos análises.
@@ -7,7 +7,7 @@ em https://resultados.tse.jus.br, que oferece uma opção para baixar os boletin
 
 
 
-* Legal, como posso ajudar?
+# Legal, como posso ajudar?
 
 Eu não sou estatístico nem muito menos um data scientist. Se tiver o expertise e queira analisar os dados, esteja à vontade!
 
@@ -16,7 +16,7 @@ Se quiser corrigir alguma informação incorreta sobre os formatos/estrutura, ou
 Sugestões são bem-vindas.
 
 
-* Por onde começar?
+# Por onde começar?
 
 Analisando a estrutura do site, percebi que a aplicação web se utiliza de algumas consultas prontas, trazidas em formato JSON.
 Estas consultas possuem desde dados das eleições, candidatos e partidos, municípios e até os dados individuais de zonas e seções.
@@ -28,7 +28,7 @@ Depois de determinar os padrões para nomenclatura dos arquivos, apenas gerei um
 
 Para tanto, os passos iniciais ficaram assim:
 
-1. Obter a relação de pleitos
+## 1. Obter a relação de pleitos
 
 URL de exemplo: https://resultados.tse.jus.br/oficial/comum/config/ele-c.json
 
@@ -79,7 +79,7 @@ URL de exemplo: https://resultados.tse.jus.br/oficial/comum/config/ele-c.json
 ```
 
                
-2. Obter a lista de municípios, zonas e seções do estado
+## 2. Obter a lista de municípios, zonas e seções do estado
 
 URL de exemplo: https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/config/ap/ap-p000406-cs.json
 
@@ -105,7 +105,7 @@ for f in ${ESTADOS}; do wget https://resultados.tse.jus.br/oficial/ele2022/arqui
 ```
 
 
-3. Obter lista de urnas por estado/município/seção (com hashes e nomes de arquivos)
+## 3. Obter lista de urnas por estado/município/seção (com hashes e nomes de arquivos)
 
 URL de exemplo: https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/dados/ap/06050/0002/0824/p000406-ap-m06050-z0002-s0824-aux.json
 
@@ -137,8 +137,8 @@ URL de exemplo: https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/d
 
 ----> a lista "hashes" pode conter mais de um registro de urna naquela seção
 
-======
-Breakdown dos parâmetros:
+
+* Breakdown dos parâmetros:
 406 = código do pleito ( o mesmo para o 1o turno pro BR inteiro?)
 ap = Amapá
 06050 = código do município (Macapá)
@@ -155,9 +155,9 @@ z0002 = zona eleitoral 0002
 s0824 = seção 0824
 
 
-4. Obter arquivos da cada urna
+## 4. Obter arquivos da cada urna
 
-https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/dados/ap/06050/0002/0824/534f753676357056516e4a42384e376c77544b32533257562b794a2d4968375a6e7a654f504b6746762b493d/o00406-0605000020824.logjez
+URL de exemplo: https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/dados/ap/06050/0002/0824/534f753676357056516e4a42384e376c77544b32533257562b794a2d4968375a6e7a654f504b6746762b493d/o00406-0605000020824.logjez
 
 *** também aceita as extensões:
 - bu (boletim de urna)
@@ -167,7 +167,7 @@ https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/dados/ap/06050/00
 - logjez = identificado como 7-zip, contém um arquivo logd.dat, que é o log em formato texto
 
 
-Composição da URL:
+* Composição da URL:
 
 oficial = base de dados
 ele2022 = eleição
@@ -191,18 +191,18 @@ o00406 = pleito
 
 Logo, neste caso é necessário baixar 5 URLs:
 
-https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/dados/ap/06050/0002/0824/534f753676357056516e4a42384e376c77544b32533257562b794a2d4968375a6e7a654f504b6746762b493d/o00406-0605000020824.logjez
+- https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/dados/ap/06050/0002/0824/534f753676357056516e4a42384e376c77544b32533257562b794a2d4968375a6e7a654f504b6746762b493d/o00406-0605000020824.logjez
 
-https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/dados/ap/06050/0002/0824/534f753676357056516e4a42384e376c77544b32533257562b794a2d4968375a6e7a654f504b6746762b493d/o00406-0605000020824.rdv
+- https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/dados/ap/06050/0002/0824/534f753676357056516e4a42384e376c77544b32533257562b794a2d4968375a6e7a654f504b6746762b493d/o00406-0605000020824.rdv
 
-https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/dados/ap/06050/0002/0824/534f753676357056516e4a42384e376c77544b32533257562b794a2d4968375a6e7a654f504b6746762b493d/o00406-0605000020824.bu
+- https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/dados/ap/06050/0002/0824/534f753676357056516e4a42384e376c77544b32533257562b794a2d4968375a6e7a654f504b6746762b493d/o00406-0605000020824.bu
 
-https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/dados/ap/06050/0002/0824/534f753676357056516e4a42384e376c77544b32533257562b794a2d4968375a6e7a654f504b6746762b493d/o00406-0605000020824.imgbu
+- https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/dados/ap/06050/0002/0824/534f753676357056516e4a42384e376c77544b32533257562b794a2d4968375a6e7a654f504b6746762b493d/o00406-0605000020824.imgbu
 
-https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/dados/ap/06050/0002/0824/534f753676357056516e4a42384e376c77544b32533257562b794a2d4968375a6e7a654f504b6746762b493d/o00406-0605000020824.vscmr
+- https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/dados/ap/06050/0002/0824/534f753676357056516e4a42384e376c77544b32533257562b794a2d4968375a6e7a654f504b6746762b493d/o00406-0605000020824.vscmr
 
 
-* Baixa de arquivos
+# Baixa de arquivos
 
 Cada zona pode ter N seções, e cada seção tem *pelo menos* uma urna. Cada urna tem 5 arquivos de dados. 
 
@@ -217,15 +217,15 @@ O programa "baixa_por_uf.py" atende exatamente este problema.
 Para começar, é preciso deixar claro que tomei alguns "atalhos", pois o interesse não era recriar totalmente a base do TSE, mas sim buscar os BUs com votos do primeiro turno das eleições de 2022. Logo, alguns valores estão "hard-coded" para facilitar.
 
 
-* Processamento dos dados obtidos
+# Processamento dos dados obtidos
 
 Uma vez obtidos todos os dados, é hora de interpretar os arquivos.
 
 Dos 5 arquivos baixados, 2 chamam a atenção: os de extensão .logjez e .bu. 
 
-O .logjez é um arquivo compactado no formato 7-zip. Dentro dele, encontramos um log em formato texto da urna. Apesar de ter (muitas) informações interessantes sobre o funcionamento do equipamento da urna, inclusive os votos (anonimizados) entrados pelos eleitores, não possui dados sobre a quantidade de eleitores habilitados para aquela seção versus a quantidade de eleitores que votaram (que é um dos pontos questionados). O formato também não ajuda na hora de interpretar programaticamente.
+O arquivo .logjez é um arquivo compactado no formato 7-zip. Dentro dele, encontramos um log em formato texto da urna. Apesar de ter (muitas) informações interessantes sobre o funcionamento do equipamento da urna, inclusive os votos (anonimizados) entrados pelos eleitores, não possui dados sobre a quantidade de eleitores habilitados para aquela seção versus a quantidade de eleitores que votaram (que é um dos pontos questionados). O formato também não ajuda na hora de interpretar programaticamente.
 
-O .bu é o boletim final da urna. Ele contém as informações que precisamos, mas está em formato binário (ASN.1). Depois de quebrar a cabeça tentando fazer a engenharia reversa parcial dos campos, encontrei uma documentação oficial(!) com os formatos dos arquivos. Note que trata-se de documentação *PÚBLICA*, baixada da URL https://www.tre-mt.jus.br/eleicoes/eleicoes-2022/documentacao-tecnica-do-software-da-urna-eletronica .
+O arquivo .bu é o boletim final da urna. Ele contém as informações que precisamos, mas está em formato binário (ASN.1). Depois de quebrar a cabeça tentando fazer a engenharia reversa parcial dos campos, encontrei uma documentação oficial(!) com os formatos dos arquivos. Note que trata-se de documentação *PÚBLICA*, baixada da URL https://www.tre-mt.jus.br/eleicoes/eleicoes-2022/documentacao-tecnica-do-software-da-urna-eletronica .
 
 Para conveniência, deixei uma cópia desta documentação no diretório "doc".
 
@@ -255,9 +255,9 @@ quantidade_votos = quantidade de votos registrados para aquele candidato
 os votos brancos e nulos aparecem como um "candidato" também.
 
 
-* Bônus: Relação de candidatos e resultados simplificados de cada estado
+# Bônus: Relação de candidatos e resultados simplificados de cada estado
 
-https://resultados.tse.jus.br/oficial/ele2022/546/dados-simplificados/ap/ap-c0007-e000546-r.json
+URL de exemplo: https://resultados.tse.jus.br/oficial/ele2022/546/dados-simplificados/ap/ap-c0007-e000546-r.json
 
 onde:
 
