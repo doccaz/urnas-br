@@ -132,12 +132,15 @@ def processa_estado(filename):
         uf = data['cd'].lower()
         
         # processa municipio por município
+        count_mu = 1
         for mu in data['mu']:
-            log(f"processando municipio {mu['nm']} ({mu['cd']})")
-            log(f"---> total de {len(mu['zon'])} zonas encontradas")
+            log(f"================= [{count_mu}/{len(data['mu'])}] processando municipio {mu['nm']} ({mu['cd']})")
+            count_zona = 1
             for zon in mu['zon']:
-                log(f"---> processando zona {zon['cd']} ({len(zon['sec'])} seções)")
+                log(f"================= [{count_zona}/{len(mu['zon'])}] processando zona {zon['cd']} ({len(zon['sec'])} seções)")
+                count_secao = 1
                 for sec in zon['sec']:
+                    log(f"================= [{count_secao}/{len(zon['sec'])}] processando secao {sec['ns']}")
                     # Obtém lista de urnas por estado/município/seção (com hashes e nomes de arquivos)
                     # https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/dados/ap/06050/0002/0824/p000406-ap-m06050-z0002-s0824-aux.json
                     file = 'p000' + pleito + '-' + uf + '-m' + mu['cd'] + '-z' + zon['cd'] + '-s' + sec['ns'] + '-aux.json' 
@@ -152,8 +155,9 @@ def processa_estado(filename):
                         log(f"Total de {len(dados_secao['hashes'])} urnas nesta seção.")
 
                         # baixa os arquivos individuais de cada urna
+                        count_urna = 1
                         for urna in dados_secao['hashes']:
-                            log(f"Baixando arquivos da urna com hash {urna['hash']}")
+                            log(f"=================  [{count_urna}/{len(dados_secao['hashes'])}] Baixando arquivos da urna com hash {urna['hash']}")
                             if urna['hash'] == '0':
                                 log("Urna não instalada, pulando...")
                                 continue
@@ -163,11 +167,15 @@ def processa_estado(filename):
                                 # https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/dados/ap/06050/0002/0824/534f753676357056516e4a42384e376c77544b32533257562b794a2d4968375a6e7a654f504b6746762b493d/o00406-0605000020824.logjez
                                 outdir = os.path.join(data_dir, uf, mu['cd'], zon['cd'], sec['ns'])
                                 os.makedirs(outdir, exist_ok=True)
-                                log(f"---> baixando log de urna: {datafile} para {outdir}")
+                                log(f"\t\t---> baixando log de urna: {datafile} para {outdir}")
                                 status, data = baixa_arquivo(base_url + '/arquivo-urna/' + pleito + '/dados/' + uf + '/' + mu['cd'] + '/' + zon['cd'] + '/' + sec['ns'] + '/' + urna['hash'] + '/' + datafile, outdir)
                                 if status != 200:
                                     log(f"=========> erro {status} ao baixar arquivo de dados, saindo")
                                     return False
+                            count_urna+=1
+                    count_secao+=1
+                count_zona+=1
+            count_mu+=1
                             
 
     return True
