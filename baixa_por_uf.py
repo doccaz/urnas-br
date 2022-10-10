@@ -144,7 +144,7 @@ def processa_estado(filename):
                     # Obtém lista de urnas por estado/município/seção (com hashes e nomes de arquivos)
                     # https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/dados/ap/06050/0002/0824/p000406-ap-m06050-z0002-s0824-aux.json
                     file = 'p000' + pleito + '-' + uf + '-m' + mu['cd'] + '-z' + zon['cd'] + '-s' + sec['ns'] + '-aux.json' 
-                    status, data = baixa_arquivo(base_url + '/arquivo-urna/' + pleito + '/dados/' + uf + '/' + mu['cd'] + '/' + zon['cd'] + '/' + sec['ns'] + '/' + file, json_dir)
+                    status, dados_secao = baixa_arquivo(base_url + '/arquivo-urna/' + pleito + '/dados/' + uf + '/' + mu['cd'] + '/' + zon['cd'] + '/' + sec['ns'] + '/' + file, json_dir)
                     if status != 200:
                         log(f"=========> erro {status} ao baixar arquivo de zona, saindo")
                         return False
@@ -168,7 +168,7 @@ def processa_estado(filename):
                                 outdir = os.path.join(data_dir, uf, mu['cd'], zon['cd'], sec['ns'])
                                 os.makedirs(outdir, exist_ok=True)
                                 log(f"\t\t---> baixando log de urna: {datafile} para {outdir}")
-                                status, data = baixa_arquivo(base_url + '/arquivo-urna/' + pleito + '/dados/' + uf + '/' + mu['cd'] + '/' + zon['cd'] + '/' + sec['ns'] + '/' + urna['hash'] + '/' + datafile, outdir)
+                                status, dados_urna = baixa_arquivo(base_url + '/arquivo-urna/' + pleito + '/dados/' + uf + '/' + mu['cd'] + '/' + zon['cd'] + '/' + sec['ns'] + '/' + urna['hash'] + '/' + datafile, outdir)
                                 if status != 200:
                                     log(f"=========> erro {status} ao baixar arquivo de dados, saindo")
                                     return False
