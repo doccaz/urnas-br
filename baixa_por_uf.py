@@ -140,7 +140,7 @@ def processa_estado(filename):
                 log(f"================= [{count_zona}/{len(mu['zon'])}] processando zona {zon['cd']} ({len(zon['sec'])} seções)")
                 count_secao = 1
                 for sec in zon['sec']:
-                    log(f"================= [{count_secao}/{len(zon['sec'])}] processando secao {sec['ns']}")
+                    log(f"================= Município: [{count_mu}/{len(data['mu'])}] Zona: [{count_zona}/{len(mu['zon'])}] Seção: [{count_secao}/{len(zon['sec'])}] processando secao {sec['ns']}")
                     # Obtém lista de urnas por estado/município/seção (com hashes e nomes de arquivos)
                     # https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/dados/ap/06050/0002/0824/p000406-ap-m06050-z0002-s0824-aux.json
                     file = 'p000' + pleito + '-' + uf + '-m' + mu['cd'] + '-z' + zon['cd'] + '-s' + sec['ns'] + '-aux.json' 
@@ -157,7 +157,7 @@ def processa_estado(filename):
                         # baixa os arquivos individuais de cada urna
                         count_urna = 1
                         for urna in dados_secao['hashes']:
-                            log(f"=================  [{count_urna}/{len(dados_secao['hashes'])}] Baixando arquivos da urna com hash {urna['hash']}")
+                            log(f"=================  Urna: [{count_urna}/{len(dados_secao['hashes'])}] Baixando arquivos da urna com hash {urna['hash']}")
                             if urna['hash'] == '0':
                                 log("Urna não instalada, pulando...")
                                 continue
