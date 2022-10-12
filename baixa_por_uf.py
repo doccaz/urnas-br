@@ -37,6 +37,7 @@ def exibe_ajuda():
     print('Uso: ')
     print('\t-u|--uf=<estado>\t\tEstado a consultar')
     print('\t-a|--all\t\tBaixa todos os estados')
+    print('\t-b|--bu\t\tBaixa apenas os arquivos de BU, ignorando os outros tipos')
     print('\t-h|--help\t\tExibe a ajuda')
     return
 
@@ -122,7 +123,7 @@ def baixa_arquivo(url, dest_dir, force=False, skipExisting=True):
     else:
         return status_code, None
 
-def processa_estado(filename):
+def processa_estado(filename, somente_bu):
     
     # carrega o arquivo do estado
     with open(filename, "r") as f:
@@ -168,7 +169,11 @@ def processa_estado(filename):
                                 outdir = os.path.join(data_dir, uf, mu['cd'], zon['cd'], sec['ns'])
                                 os.makedirs(outdir, exist_ok=True)
                                 log(f"\t\t---> baixando log de urna: {datafile} para {outdir}")
-                                status, dados_urna = baixa_arquivo(base_url + '/arquivo-urna/' + pleito + '/dados/' + uf + '/' + mu['cd'] + '/' + zon['cd'] + '/' + sec['ns'] + '/' + urna['hash'] + '/' + datafile, outdir)
+                                if somente_bu and not os.path.basename(datafile).endswith(".bu"):
+                                    log(f"somente BU será baixado, pulando arquivo {datafile}")
+                                    continue
+                                else:    
+                                    status, dados_urna = baixa_arquivo(base_url + '/arquivo-urna/' + pleito + '/dados/' + uf + '/' + mu['cd'] + '/' + zon['cd'] + '/' + sec['ns'] + '/' + urna['hash'] + '/' + datafile, outdir)
                                 if status != 200:
                                     log(f"=========> erro {status} ao baixar arquivo de dados, saindo")
                                     return False
@@ -183,10 +188,11 @@ def processa_estado(filename):
 def main():
     
     baixa_todos = False
+    somente_bu = False
     uf = None
     
     try:
-        opts,args = getopt.getopt(sys.argv[1:],  "hu:a", [ "help", "uf=", "all" ])
+        opts,args = getopt.getopt(sys.argv[1:],  "hu:ab", [ "help", "uf=", "all", "bu" ])
     except getopt.GetoptError as err:
         log(err)
         exibe_ajuda()
@@ -200,6 +206,8 @@ def main():
             uf = a
         elif o in ("-a", "--all"):
             baixa_todos = True
+        elif o in ("-b", "--bu"):
+            somente_bu = True
             
     if uf is None and not baixa_todos:
         log('Necessário informar UF.')
@@ -212,7 +220,7 @@ def main():
             file = uf + '-p000' + pleito + '-cs.json'
             status, data = baixa_arquivo(base_url + '/arquivo-urna/' + pleito + '/config/' + uf + '/' + file, json_dir)
             if status == 200:
-                if processa_estado(os.path.join(json_dir, file)):
+                if processa_estado(os.path.join(json_dir, file), somente_bu):
                     log(f"======> Estado {uf} processado com sucesso.")
                 else:
                     log(f"======> Erro ao processar estado {uf}")
@@ -224,7 +232,7 @@ def main():
         log(f'Baixando dados de urna para o estado {uf}')
         file = uf + '-p000' + pleito + '-cs.json'
         status, data = baixa_arquivo(base_url + '/arquivo-urna/' + pleito + '/config/' + uf + '/' + file, json_dir)
-        if processa_estado(os.path.join(json_dir, file)):
+        if processa_estado(os.path.join(json_dir, file), somente_bu):
             log(f"======> Estado {uf} processado com sucesso.")
         else:
             log(f"======> Erro ao processar estado {uf}")
