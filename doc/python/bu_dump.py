@@ -4,7 +4,7 @@ import os
 import sys
 
 import asn1tools
-import pdb
+
 
 def espacos(profundidade: int):
     return ".   " * profundidade
@@ -44,7 +44,6 @@ def processa_bu(asn1_paths: list, bu_path: str):
     conv = asn1tools.compile_files(asn1_paths, codec="ber")
     with open(bu_path, "rb") as file:
         envelope_encoded = bytearray(file.read())
-    pdb.set_trace()
     envelope_decoded = conv.decode("EntidadeEnvelopeGenerico", envelope_encoded)
     bu_encoded = envelope_decoded["conteudo"]
     del envelope_decoded["conteudo"]  # remove o conteúdo para não imprimir como array de bytes
