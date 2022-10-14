@@ -96,8 +96,8 @@ def main():
                 asn1_paths, bu)
             except Exception as e:
                 log(f"erro: {e} em {bu}")
-                # log(f"voto invalido: {voto}")
-                exit(1)
+                log(f"voto invalido: {bu}")
+                continue
             text = ''
             
             log(f"---> aptos presidente: {aptos_presidente}, presidente: {total_presidente}, aptos deputado federal: {aptos_deputado_federal}, deputado federal: {total_deputado_federal}")

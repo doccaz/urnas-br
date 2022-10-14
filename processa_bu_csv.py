@@ -95,7 +95,7 @@ def main():
             except Exception as e:
                 log(f"erro: {e} em {bu}")
                 log(f"voto invalido: {voto}")
-                exit(1)
+                continue
             text = ''
             for voto in votos:
                 if voto['tipoVoto'] == 'nominal':
