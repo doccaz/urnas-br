@@ -5,7 +5,7 @@ em https://resultados.tse.jus.br, que oferece uma opção para baixar os boletin
 
 **IMPORTANTE 1:** Trata-se de um projeto EDUCACIONAL e sem fins políticos. Apenas vi um problema interessante e resolvi estudar como resolvê-lo. Não me responsabilizo pelo que for feito com estes dados, ou por informações incorretas. Use por sua conta e risco.
 
-**IMPORTANTE 2:** Apesar de ter criado uma opção para baixar todas as UFs de uma vez, **NÃO FAÇA ISSO**. A quantidade de arquivos é **IMENSA** e pode causar problemas para os servidores do TSE. Se for baixar, baixe uma UF por vez!
+**IMPORTANTE 2:** Apesar de ter criado uma opção para baixar todas as UFs de uma vez, **NÃO FAÇA ISSO**. A quantidade de arquivos é **IMENSA** (CENTENAS DE MILHARES de arquivos) e pode causar problemas para os servidores do TSE. Se for baixar, baixe uma UF por vez!
 
 
 # Legal, como posso ajudar?
@@ -27,7 +27,83 @@ Depois de muita análise e engenharia reversa, consegui criar um mapa lógico do
 Depois de determinar os padrões para nomenclatura dos arquivos, apenas gerei um script simples em BASH para baixar os JSON principais para cada UF.
 
 
-Para tanto, os passos iniciais ficaram assim:
+
+# Utilização do script
+
+O script precisa de alguns parâmetros para ser executado:
+
+```
+erico@suselab-erico:/data/urnas-br> ./baixa_por_uf.py -h
+Uso: 
+        -g|--geral=<identificador geral>                Identificador geral (ex: ele2022)
+        -p|--pleito=<id do pleito>                      Identificador do Pleito (ex: 406)
+        -e|--eleicao=<id da eleição>                    Identificador da Eleição (ex: 544)
+        -u|--uf=<estado>                                Estado a consultar
+        -a|--all                                        Baixa todos os estados
+        -b|--bu                                         Baixa apenas os arquivos de BU, ignorando os outros tipos
+        -i|--imgbu                                      Baixa apenas os arquivos de espelho de BU, ignorando os outros tipos
+        -z|--logjez                                     Baixa apenas os arquivos de log, ignorando os outros tipos
+        -r|--rdv                                        Baixa apenas os arquivos de registro de voto, ignorando os outros tipos
+        -v|--vscmr                                      Baixa apenas os arquivos de assinaturas, ignorando os outros tipos
+        -l|--list                                       Lista os identificadores disponíveis na base do TSE
+        -h|--help                                       Exibe a ajuda
+
+```
+
+
+Utilize a opção '-l' (ou --list) para obter a lista com todos os identificadores de eleição disponíveis na base do TSE:
+
+```
+erico@suselab-erico:/data/urnas-br> ./baixa_por_uf.py -l
+* iniciando download: https://resultados.tse.jus.br/oficial/comum/config/ele-c.json (4681 bytes)
+[OK] download concluido: https://resultados.tse.jus.br/oficial/comum/config/ele-c.json status: 200 (4681 bytes, 0 segundos)
+
+IDENTIFICADOR GERAL: ele2022
+==============================================
+
+
+---> PLEITO: 406
+CODIGO: 546 - Eleição Ordinária Estadual - 2022 1&#186; Turno
+CODIGO: 544 - Eleição Ordinária Federal - 2022 1&#186; Turno
+CODIGO: 548 - Eleição Ordinária Municipal - 2022 - 02/10/2022 1&#186; Turno
+
+---> PLEITO: 407
+CODIGO: 571 - Eleição Suplementar - Vilhena
+CODIGO: 563 - Eleição Suplementar - Canoinhas
+CODIGO: 574 - Eleição Suplementar - Joaquim Nabuco
+CODIGO: 562 - Eleição Suplementar - Pesqueira
+CODIGO: 547 - Eleição Ordinária Estadual - 2022 2&#186; Turno
+CODIGO: 565 - Eleição Suplementar - Cerro Grande
+CODIGO: 566 - Eleição Suplementar - Entre Rios Do Sul
+CODIGO: 564 - Eleição Suplementar - Cachoeirinha
+CODIGO: 572 - Eleição Suplementar - Pinhalzinho
+CODIGO: 545 - Eleição Ordinária Federal - 2022 2&#186; Turno
+
+---> PLEITO: 421
+CODIGO: 581 - Eleição Suplementar - Maraial
+```
+
+Logo, se quisermos por exemplo baixar os dados de urna para o DF, da eleição 545 (Federal, segundo turno), fazemos:
+
+```
+erico@suselab-erico:/data/urnas-br> ./baixa_por_uf.py -g ele2022 -p 407 -e 545 -u df
+```
+
+e o download irá começar. Pressione CTRL-C para interromper se necessário. Execuções subsequentes pulam os arquivos já baixados e continuam de onde parou o processo.
+
+Por padrão, baixamos todos os arquivos disponíveis para cada urna (são 5: logjez, bu, imgbu, rdv e vscmr). Caso queira limitar a um ou mais tipos, basta especificar os flags correspondentes.
+
+Por exemplo, para baixar APENAS os boletins de urna para o estado AMAZONAS da eleição 2022 do segundo turno (federal):
+
+```
+erico@suselab-erico:/data/urnas-br> ./baixa_por_uf.py -g ele2022 -p 407 -e 545 -u am --bu
+```
+
+
+
+# Ok, mas como funciona tudo por trás e como você encontrou as informações???
+
+Os passos para se obter os dados de uma eleição ficaram assim:
 
 ## 1. Obter a relação de pleitos
 

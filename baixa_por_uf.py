@@ -5,10 +5,13 @@ import getopt
 import os,sys
 import pycurl
 import json
+import signal
 import pdb
 
+from testtools import skip
+
 # dados de url
-base_url = 'https://resultados.tse.jus.br/oficial/ele2022'
+base_url = 'https://resultados.tse.jus.br/oficial'
 
 # diretório onde salvar os arquivos
 json_dir = 'json/'
@@ -23,10 +26,6 @@ download_retries = 15   # número de tentativas
 
 ESTADOS= [ 'ac', 'al', 'ap', 'am', 'ba', 'ce', 'df', 'es', 'go', 'ma', 'mt', 'ms', 'mg', 'pa', 'pb', 'pr', 'pe', 'pi', 'rj', 'rn', 'rs', 'ro', 'rr', 'sc', 'sp', 'se', 'to' ]
 
-# fixamos o pleito em "406" (eleições gerais 2022) -- ver nota 1
-pleito = '406'
-
-
 # funcao de log
 def log(mensagem):
     print(mensagem)
@@ -35,12 +34,24 @@ def log(mensagem):
 
 def exibe_ajuda():
     print('Uso: ')
-    print('\t-u|--uf=<estado>\t\tEstado a consultar')
-    print('\t-a|--all\t\tBaixa todos os estados')
-    print('\t-b|--bu\t\tBaixa apenas os arquivos de BU, ignorando os outros tipos')
-    print('\t-h|--help\t\tExibe a ajuda')
+    print('\t-g|--geral=<identificador geral>\t\tIdentificador geral (ex: ele2022)')
+    print('\t-p|--pleito=<id do pleito>\t\t\tIdentificador do Pleito (ex: 406)')
+    print('\t-e|--eleicao=<id da eleição>\t\t\tIdentificador da Eleição (ex: 544)')
+    print('\t-u|--uf=<estado>\t\t\t\tEstado a consultar')
+    print('\t-a|--all\t\t\t\t\tBaixa todos os estados')
+    print('\t-b|--bu\t\t\t\t\t\tBaixa apenas os arquivos de BU, ignorando os outros tipos')
+    print('\t-i|--imgbu\t\t\t\t\tBaixa apenas os arquivos de espelho de BU, ignorando os outros tipos')
+    print('\t-z|--logjez\t\t\t\t\tBaixa apenas os arquivos de log, ignorando os outros tipos')
+    print('\t-r|--rdv\t\t\t\t\tBaixa apenas os arquivos de registro de voto, ignorando os outros tipos')
+    print('\t-v|--vscmr\t\t\t\t\tBaixa apenas os arquivos de assinaturas, ignorando os outros tipos')
+    print('\t-l|--list\t\t\t\t\tLista os identificadores disponíveis na base do TSE')
+    print('\t-h|--help\t\t\t\t\tExibe a ajuda')
     return
 
+def signal_handler(sig, frame):
+    print('Processo interrompido, fechando...')
+    sys.exit(0)
+    
 # baixa um arquivo
 def baixa_arquivo(url, dest_dir, force=False, skipExisting=True):
     status_code = -1
@@ -76,12 +87,12 @@ def baixa_arquivo(url, dest_dir, force=False, skipExisting=True):
             # se o arquivo existir...
             if os.path.exists(filename):
                 file_size = os.path.getsize(filename)
-                if (file_size == bytes_size) and force is False:
+                if (file_size == bytes_size) and skipExisting:
                     log('[OK] arquivo %s já foi baixado completamente (%d bytes).' % (url, bytes_size))
                     return status_code, None
-                     
-        fd = open(filename, 'wb')
-        c.setopt(c.WRITEFUNCTION, fd.write)
+            else:
+                fd = open(filename, 'wb')
+                c.setopt(c.WRITEFUNCTION, fd.write)
         data = None
 
         if status_code == 404:
@@ -123,7 +134,7 @@ def baixa_arquivo(url, dest_dir, force=False, skipExisting=True):
     else:
         return status_code, None
 
-def processa_estado(filename, somente_bu):
+def processa_estado(filename, geral, pleito, eleicao, somente_bu, somente_imgbu, somente_log, somente_rdv, somente_vsmcr):
     
     # carrega o arquivo do estado
     with open(filename, "r") as f:
@@ -145,7 +156,7 @@ def processa_estado(filename, somente_bu):
                     # Obtém lista de urnas por estado/município/seção (com hashes e nomes de arquivos)
                     # https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/dados/ap/06050/0002/0824/p000406-ap-m06050-z0002-s0824-aux.json
                     file = 'p000' + pleito + '-' + uf + '-m' + mu['cd'] + '-z' + zon['cd'] + '-s' + sec['ns'] + '-aux.json' 
-                    status, dados_secao = baixa_arquivo(base_url + '/arquivo-urna/' + pleito + '/dados/' + uf + '/' + mu['cd'] + '/' + zon['cd'] + '/' + sec['ns'] + '/' + file, json_dir)
+                    status, dados_secao = baixa_arquivo(base_url + '/' + geral + '/arquivo-urna/' + pleito + '/dados/' + uf + '/' + mu['cd'] + '/' + zon['cd'] + '/' + sec['ns'] + '/' + file, json_dir)
                     if status != 200:
                         log(f"=========> erro {status} ao baixar arquivo de zona, saindo")
                         return False
@@ -172,8 +183,20 @@ def processa_estado(filename, somente_bu):
                                 if somente_bu and not os.path.basename(datafile).endswith(".bu"):
                                     log(f"somente BU será baixado, pulando arquivo {datafile}")
                                     continue
+                                if somente_imgbu and not os.path.basename(datafile).endswith(".imgbu"):
+                                    log(f"somente espelho de BU será baixado, pulando arquivo {datafile}")
+                                    continue
+                                if somente_log and not os.path.basename(datafile).endswith(".logjez"):
+                                    log(f"somente log será baixado, pulando arquivo {datafile}")
+                                    continue
+                                if somente_rdv and not os.path.basename(datafile).endswith(".rdv"):
+                                    log(f"somente registro de voto será baixado, pulando arquivo {datafile}")
+                                    continue
+                                if somente_vsmcr and not os.path.basename(datafile).endswith(".vscmr"):
+                                    log(f"somente arquivo de assinaturas será baixado, pulando arquivo {datafile}")
+                                    continue
                                 else:    
-                                    status, dados_urna = baixa_arquivo(base_url + '/arquivo-urna/' + pleito + '/dados/' + uf + '/' + mu['cd'] + '/' + zon['cd'] + '/' + sec['ns'] + '/' + urna['hash'] + '/' + datafile, outdir)
+                                    status, dados_urna = baixa_arquivo(base_url + '/' + geral + '/arquivo-urna/' + pleito + '/dados/' + uf + '/' + mu['cd'] + '/' + zon['cd'] + '/' + sec['ns'] + '/' + urna['hash'] + '/' + datafile, outdir)
                                 if status != 200:
                                     log(f"=========> erro {status} ao baixar arquivo de dados, saindo")
                                     return False
@@ -189,10 +212,18 @@ def main():
     
     baixa_todos = False
     somente_bu = False
+    somente_imgbu = False
+    somente_log = False
+    somente_listar = False
+    somente_rdv = False
+    somente_vscmr = False
+    geral = None
+    pleito = None
+    eleicao = None
     uf = None
     
     try:
-        opts,args = getopt.getopt(sys.argv[1:],  "hu:ab", [ "help", "uf=", "all", "bu" ])
+        opts,args = getopt.getopt(sys.argv[1:],  "hg:p:e:u:abizrvl", [ "help", "geral=", "pleito=", "eleicao=", "uf=", "all", "bu", "imgbu", "logjez", "rdv", "vscmr", "list" ])
     except getopt.GetoptError as err:
         log(err)
         exibe_ajuda()
@@ -202,12 +233,53 @@ def main():
         if o in ("-h", "--help"):
             exibe_ajuda()
             exit(1)
+        elif o in ("-g", "--geral"):
+            geral = a
+        elif o in ("-p", "--pleito"):
+            pleito = a
+        elif o in ("-e", "--eleicao"):
+            eleicao = a
         elif o in ("-u", "--uf"):
             uf = a
         elif o in ("-a", "--all"):
             baixa_todos = True
         elif o in ("-b", "--bu"):
             somente_bu = True
+        elif o in ("-i", "--imgbu"):
+            somente_imgbu = True
+        elif o in ("-z", "--logjez"):
+            somente_log = True
+        elif o in ("-r", "--rdv"):
+            somente_rdv = True
+        elif o in ("-v", "--vscmr"):
+            somente_vscmr = True            
+        elif o in ("-l", "--list"):
+            somente_listar = True
+
+
+    # intercepta o CTRL-C
+    signal.signal(signal.SIGINT, signal_handler)
+
+    if somente_listar:
+        status, data = baixa_arquivo(base_url + '/comum/config/ele-c.json', json_dir, skipExisting=False, force=True)
+        if status == 200:
+            with open(os.path.join(json_dir, 'ele-c.json'), 'r') as f:
+                dados=json.loads(f.read())
+            log(f"\nIDENTIFICADOR GERAL: {dados['c']}")
+            log(f"==============================================\n")
+            for p in dados['pl']:
+                log(f"\n---> PLEITO: {p['cd']}")
+                for e in p['e']:
+                    log(f"CODIGO: {e['cd']} - {e['nm']}")
+
+            exit(0)
+        else:
+            log(f"Erro ao obter lista.")
+            exit(2)
+   
+    if geral is None or eleicao is None or pleito is None:
+        log('Necessário informar identificadores: geral, pleito, eleição. Use "--list" para obter a lista atualizada.')
+        exit(2)
             
     if uf is None and not baixa_todos:
         log('Necessário informar UF.')
@@ -218,9 +290,9 @@ def main():
         for uf in ESTADOS:            
             log(f'Baixando dados de urna para o estado {uf}')
             file = uf + '-p000' + pleito + '-cs.json'
-            status, data = baixa_arquivo(base_url + '/arquivo-urna/' + pleito + '/config/' + uf + '/' + file, json_dir)
+            status, data = baixa_arquivo(base_url + '/' + geral + '/arquivo-urna/' + pleito + '/config/' + uf + '/' + file, json_dir)
             if status == 200:
-                if processa_estado(os.path.join(json_dir, file), somente_bu):
+                if processa_estado(os.path.join(json_dir, file), geral, pleito, eleicao, somente_bu, somente_imgbu, somente_log, somente_rdv, somente_vscmr):
                     log(f"======> Estado {uf} processado com sucesso.")
                 else:
                     log(f"======> Erro ao processar estado {uf}")
@@ -231,8 +303,8 @@ def main():
     else:
         log(f'Baixando dados de urna para o estado {uf}')
         file = uf + '-p000' + pleito + '-cs.json'
-        status, data = baixa_arquivo(base_url + '/arquivo-urna/' + pleito + '/config/' + uf + '/' + file, json_dir)
-        if processa_estado(os.path.join(json_dir, file), somente_bu):
+        status, data = baixa_arquivo(base_url + '/' + geral + '/arquivo-urna/' + pleito + '/config/' + uf + '/' + file, json_dir)
+        if processa_estado(os.path.join(json_dir, file), geral, pleito, eleicao, somente_bu, somente_imgbu, somente_log, somente_rdv, somente_vscmr):
             log(f"======> Estado {uf} processado com sucesso.")
         else:
             log(f"======> Erro ao processar estado {uf}")
