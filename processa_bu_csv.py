@@ -22,6 +22,7 @@ def log(mensagem):
 def exibe_ajuda():
     print('Uso: ')
     print('\t-u|--uf=<estado>\t\tEstado a processar')
+    print('\t-p|--pleito=<id do pleito>\t\t\tIdentificador do Pleito (ex: 406)')
     print('\t-h|--help\t\tExibe a ajuda')
     return
 
@@ -37,7 +38,6 @@ def processa_bu(asn1_paths: list, bu_path: str):
     # remove o conteúdo para não imprimir como array de bytes
     del envelope_decoded["conteudo"]
     bu_decoded = conv.decode("EntidadeBoletimUrna", bu_encoded)
-
     # municipio, zona, secao, eleitores aptos para votar em presidente, votos para presidente
     return (envelope_decoded['identificacao'][1]['municipioZona']['municipio'], envelope_decoded['identificacao'][1]['municipioZona']['zona'], envelope_decoded['identificacao'][1]['secao'], bu_decoded['resultadosVotacaoPorEleicao'][1]['qtdEleitoresAptos'], bu_decoded['resultadosVotacaoPorEleicao'][1]['resultadosVotacao'][0]['totaisVotosCargo'][0]['votosVotaveis'])
 
@@ -47,6 +47,7 @@ def main():
     uf = None
     secao = None
     resultados = None
+    pleito = None
     files = []
 
     if not os.path.exists(asn1_paths):
@@ -54,7 +55,7 @@ def main():
         exit(2)
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:],  "hu:", ["help", "uf="])
+        opts, args = getopt.getopt(sys.argv[1:],  "hu:p:", ["help", "uf=", "pleito="])
     except getopt.GetoptError as err:
         log(err)
         exibe_ajuda()
@@ -66,19 +67,24 @@ def main():
             exit(1)
         elif o in ("-u", "--uf"):
             uf = a
-
+        elif o in ("-p", "--pleito"):
+            pleito = a
     if uf is None:
         exibe_ajuda()
         exit(1)
 
-    files = glob.glob('./data/' + uf + '/**/**/**/*.bu')
+    if pleito is None:
+        log('Necessário informar identificadores: pleito.')
+        exit(2)
+        
+    files = glob.glob('./data/' + uf + '/**/**/**/o00' + pleito + '*.bu')
 
 
     log(f"Total de {len(files)} boletins de urna a serem processados")
 
 
     # carrega dados de municípios
-    with open('./json/' + uf + '-p000406-cs.json', "r") as f:
+    with open('./json/' + uf + '-p000' + pleito + '-cs.json', "r") as f:
         dados_estado = json.loads(f.read())
         data = dados_estado['abr'][0]
         log(f"total de {len(data['mu'])} municípios para ({data['ds']} - {data['cd']})")
