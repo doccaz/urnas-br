@@ -91,7 +91,7 @@ def main():
         
     count=1
     
-    with open('resumo-' + uf + '.csv', 'w') as f:
+    with open('resumo-' + uf + '-' + pleito + '.csv', 'w') as f:
         f.write(f"\"UF\",\"cod_municipio\",\"municipio\",\"zona\",\"secao\",\"eleitores_aptos\",\"candidato\",\"quantidade_votos\"\n")
         for bu in files:
             log(f"[{count}/{len(files)}] processando {bu}")

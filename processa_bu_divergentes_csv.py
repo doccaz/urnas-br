@@ -95,7 +95,7 @@ def main():
         
     count=1
     
-    with open('resumo-divergentes-' + uf + '.csv', 'w') as f:
+    with open('resumo-divergentes-' + uf + '-' + pleito + '.csv', 'w') as f:
         f.write(f"\"UF\",\"cod_municipio\",\"municipio\",\"zona\",\"secao\",\"aptos_presidente\",\"total_votos_presidente\",\"aptos_deputado_federal\",\"total_deputado_federal\"\n")
         for bu in files:
             log(f"[{count}/{len(files)}] processando {bu}")
