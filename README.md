@@ -385,3 +385,19 @@ ESTADOS="ac al ap am ba ce df es go ma mt ms mg pa pb pr pe pi rj rn rs ro rr sc
 for f in ${ESTADOS}; do wget https://resultados.tse.jus.br/oficial/ele2022/544/dados-simplificados/${f}/${f}-c0001-e000544-r.json; done
 ```
 
+# Bônus: codificação do QR Code no boletim de urna
+
+
+Existe um documento oficial do TSE (https://www.tse.jus.br/hotsites/catalogo-publicacoes/pdf/qr-code-no-boletim-de-urna-1-4.pdf) em que é mostrado parte por parte como é formado o texto que está contido no Boletim de Urna.
+
+Decodificando o próprio exemplo citado no documento, temos:
+
+```
+QRBU:1:1 ORIG:VOTA PROC:2000 DTPL:20161002 PLEI:2100 TURN:1 FASE:S UNFE:AC MUNI:1392 ZONA:9 SECA:31 IDUE:1760649 IDCA:529951844372447180336660 VERS:5.22.0.1 VRQR:4.0 LOCA:4 APTO:40 COMP:10 FALT:30 HBMA:4 DTAB:20161002 HRAB:173449 DTFC:20161002 HRFC:180133 IDEL:2101 CARG:13 TIPO:1 VERC:201606281643 PART:91 91001:1 91004:1 LEGP:0 TOTP:2 PART:92 92003:1 92004:1 92005:1 LEGP:0 TOTP:3 PART:93 93004:1 93005:1 LEGP:0 TOTP:2 PART:94 94001:2 LEGP:0 TOTP:2 NOMI:9 LEGC:0 BRAN:1 NULO:0 TOTC:10 CARG:11 TIPO:0 VERC:201606281643 91:2 92:2 93:3 97:1 NOMI:8 BRAN:2 NULO:0 TOTC:10 HASH:69720370FEF82D1235846B6500408F48068DF564553DEEAD273CA20BCE959A3791281379FF96B28755B15DFB7254EE6937C70BE69CB941D69AF73C57622DAA27 ASSI:D4A834C84DBE93DAF86CCF7B1D9743796FB478ED954C44896F551E53D3F1A9F7CCB2769564CDA02585070F313C003F8C046AD49C2250375B6818A76BD5842E0D
+```
+
+Basicamente, são colocadas as mesmas informações que estão no boletim impresso, o hash e a assinatura, precedidos de descritores.
+
+Os arquivos .imgbu contém exatamente o que é enviado para o módulo de impressora, incluindo todos os caracteres de controle (geralmente comandos ESC/P2, mas que variam de acordo com o fabricante do módulo de impressora usado na urna). A imagem do QRCode está presente como bitmap no final do arquivo, mas codificado de acordo com o que o fabricante exige. Não tenho informação de qual módulo/firmware é utilizado nas urnas, mas provavelmente é algum módulo baseado na IM453H da própria Diebold.
+
+
