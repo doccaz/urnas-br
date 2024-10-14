@@ -63,6 +63,10 @@ def baixa_arquivo(url, dest_dir, force=False, skipExisting=True):
         log(f"[OK] pulando arquivo {filename} pois já existe e foi solicitado pular")
         return 200, None
     
+    if os.path.exists(dest_dir) is False:
+        log(f"Diretório {dest_dir} não existe, criando...")
+        os.makedirs(dest_dir, mode=0o755)
+
     try:
         data = BytesIO()
         c = pycurl.Curl()
@@ -174,7 +178,13 @@ def processa_estado(filename, geral, pleito, eleicao, somente_bu, somente_imgbu,
                                 log("Urna não instalada, pulando...")
                                 continue
                             
-                            for datafile in urna['nmarq']:
+                            if 'nmarq' in urna.keys():
+                                datafiles=urna['nmarq'] # nome até as eleições de 2022
+                            else:
+                                datafiles=urna['arq'] # nome novo nas eleições de 2024-
+
+                            for file in datafiles:
+                                datafile = file['nm']
                                 # baixa os arquivos relacionados a cada urna
                                 # https://resultados.tse.jus.br/oficial/ele2022/arquivo-urna/406/dados/ap/06050/0002/0824/534f753676357056516e4a42384e376c77544b32533257562b794a2d4968375a6e7a654f504b6746762b493d/o00406-0605000020824.logjez
                                 outdir = os.path.join(data_dir, uf, mu['cd'], zon['cd'], sec['ns'])
@@ -268,9 +278,25 @@ def main():
             log(f"\nIDENTIFICADOR GERAL: {dados['c']}")
             log(f"==============================================\n")
             for p in dados['pl']:
-                log(f"\n---> PLEITO: {p['cd']}")
+                if 'dt' in p.keys():
+                    log(f"\n---> PLEITO: {p['cd']} (mandato {p['dt']} a {p['dtlim']})")
+                else:
+                    log(f"\n---> PLEITO: {p['cd']}")
                 for e in p['e']:
-                    log(f"CODIGO: {e['cd']} - {e['nm']}")
+                    log(f"Eleição: {e['cd']} - {e['nm']} - (turno: {e['t']})")
+                    if 'abr' in e.keys():
+                        log(f"-> Detalhes:")
+                        for d in e['abr']:
+                            # print(d)
+                            log(f"\tEstado: {d['cd']}")
+                            for c in d['cp']:
+                                log(f"\tDescrição: {c['ds']} (código: {c['cd']})")
+                            if 'mu' in d.keys():
+                                for m in d['mu']:
+                                    # print(m)
+                                    log(f"\tMunicípio: {m['cd']}")
+                            if 'ds' in d.keys():
+                                log(f"\t\tDescrição: {d['ds']} (tipo: {d['tp']})")
 
             exit(0)
         else:
