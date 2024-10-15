@@ -1,0 +1,104 @@
+ModuloAssinaturaResultado DEFINITIONS IMPLICIT TAGS ::= BEGIN
+
+-- Esse arquivo foi criado para aglutinar, de forma didática, informações contidas em outros arquivos a fim de facilitar a compreensão do público externo.
+-- Arquivos envolvidos: tiposeleitorais.asn1, envelopeassinatura.asn1, assinaturaecourna.asn1, envelopechave.asn1
+
+EXPORTS ALL;
+
+-- TIPOS
+DataHoraJE ::= GeneralString(SIZE(15))  -- Data e hora utilizada pela Justiça Eleitoral no formato YYYYMMDDThhmmss.
+
+-- ENUMS
+--Tipos de algoritmos de assinatura (cepesc é o algoritmo padrão (ainda não há previsão de uso dos demais)).
+AlgoritmoAssinatura ::= ENUMERATED {
+    rsa     (1),
+    ecdsa   (2),
+    cepesc  (3),
+    eddsa   (4) -- Assinatura e521 para modelos UE2020 e posteriores
+}
+
+-- Tipos de algoritmos de hash (todos os algoritmos devem ser suportados, mas sha512 é o padrão).
+AlgoritmoHash ::= ENUMERATED {
+    sha1    (1),
+    sha256  (2),
+    sha384  (3),
+    sha512  (4)
+}
+
+-- Tipos de equipamentos que geram assinatura de hardware.
+ModeloEquipamento ::= ENUMERATED {
+    tpm12   (1),    -- TPM 1.2.
+    tpm20   (2),    -- TPM 2.0.
+    ue2009  (9),    -- Urna modelo 2009.
+    ue2010  (10),   -- Urna modelo 2010.
+    ue2011  (11),   -- Urna modelo 2011.
+    ue2013  (13),   -- Urna modelo 2013.
+    ue2015  (15),   -- Urna modelo 2015.
+    ue2020  (20),   -- Urna modelo 2020.
+    ue2022  (22)    -- Urna modelo 2022.
+}
+
+-- ENVELOPE
+-- Entidade que engloba a lista de assinaturas utilizadas para assinar os arquivos para manter a integridade e segurança dos dados.
+EntidadeAssinatura ::= SEQUENCE {
+    dataHoraCriacao         DataHoraJE,                         -- Data e Hora da criacao do arquivo.
+    versao                  INTEGER (2..99999999),              -- Versao do protocolo (alterações devem gerar novo valor. Nas eleições de 2012 foi utilizado o enumerado de valor 1, a partir de 2014 utilizar o valor 2).
+    autoAssinado            AutoAssinaturaDigital,              -- Informações da auto assinatura digital.
+    conteudoAutoAssinado    OCTET STRING,                       -- Conteúdo da assinatura do próprio arquivo.
+    certificadoDigital      OCTET STRING OPTIONAL,              -- Certificado digital da urna eletrônica.
+    conjuntoChave           GeneralString(SIZE(1..15)) OPTIONAL -- Identificador do conjunto de chaves usado para assinar o pacote.
+}
+
+-- Entidade responsável por gerar o arquivo de assinaturas de sistemas do ecossistema da urna.
+-- Podendo ter dois tipos de assinatura (hardware (HW) e software (SW)).
+EntidadeAssinaturaEcourna ::= SEQUENCE {
+    modeloEquipamento   ModeloEquipamento,  -- Modelo da máquina que gerou a assinatura.
+    assinaturaSW        EntidadeAssinatura, -- Assinatura realizada via software (normalmente CEPESC).
+    assinaturaHW        EntidadeAssinatura  -- Assinatura realizada via hardware da máquina.
+}
+
+-- Demais SEQUENCES
+-- Informações do algoritmo de assinatura .
+AlgoritmoAssinaturaInfo ::= SEQUENCE {
+    algoritmo   AlgoritmoAssinatura,    -- Tipo do algoritmo de assinatura.
+    bits        INTEGER                 -- Tamanho da assinatura.
+}
+
+-- Informações do algoritmo de hash.
+AlgoritmoHashInfo ::= SEQUENCE {
+    algoritmo AlgoritmoHash -- Tipo do algoritmo de hash.
+}
+
+-- Informações dos arquivos assinados.
+Assinatura ::= SEQUENCE {
+    arquivosAssinados SEQUENCE OF AssinaturaArquivo -- Lista com Informações dos arquivos assinados.
+}
+
+--Informações do arquivo e da assinatura.
+AssinaturaArquivo ::= SEQUENCE {
+    nomeArquivo GeneralString,      -- Nome do arquivo.
+    assinatura  AssinaturaDigital   -- Assinatura digital do arquivo.
+}
+
+-- Informações da assinatura digital
+AssinaturaDigital ::= SEQUENCE {
+    tamanho     INTEGER,        -- Tamanho da assinatura.
+    hash        OCTET STRING,   -- Hash da assinatura (deve ser calculado uma única vez e ser utilizado também para o cálculo da assinatura).
+    assinatura  OCTET STRING    -- Assinatura (gerado/verificado a partir do hash acima).
+}
+
+-- Informações da auto assinatura digital.
+AutoAssinaturaDigital ::= SEQUENCE {
+    usuario             DescritorChave,             -- Nome do usuário (geralmente uma seção) que realizou a assinatura do arquivo.
+    algoritmoHash       AlgoritmoHashInfo,          -- Algoritmo de hash utilizado para realizar a assinatura (será o mesmo para as assinaturas de arquivos).
+    algoritmoAssinatura AlgoritmoAssinaturaInfo,    -- Algoritmo utilizado para realizar a assinatura (será o mesmo para as assinaturas de arquivos).
+    assinatura          AssinaturaDigital           -- Informações da assinatura digital.
+}
+
+-- Identificador com informações da assinatura.
+DescritorChave ::= SEQUENCE {
+    nomeUsuario GeneralString,  -- Nome do usuário (geralmente uma seção) que realizou a assinatura no arquivo.
+    serial      INTEGER         -- Data em que foi gerado o conjunto de chaves.
+}
+
+END

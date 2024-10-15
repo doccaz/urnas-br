@@ -8,11 +8,7 @@ import asn1tools
 import sys
 import os
 
-asn1_paths = 'doc/spec/bu.asn1'
-
 # funcao de log
-
-
 def log(mensagem):
     print(mensagem)
     # syslog.syslog(mensagem)
@@ -39,8 +35,11 @@ def processa_bu(asn1_paths: list, bu_path: str):
     del envelope_decoded["conteudo"]
     bu_decoded = conv.decode("EntidadeBoletimUrna", bu_encoded)
     # municipio, zona, secao, eleitores aptos para votar em presidente, votos para presidente
-    return (envelope_decoded['identificacao'][1]['municipioZona']['municipio'], envelope_decoded['identificacao'][1]['municipioZona']['zona'], envelope_decoded['identificacao'][1]['secao'], bu_decoded['resultadosVotacaoPorEleicao'][1]['qtdEleitoresAptos'], bu_decoded['resultadosVotacaoPorEleicao'][1]['resultadosVotacao'][0]['totaisVotosCargo'][0]['votosVotaveis'])
 
+    if 'docv2' in asn1_paths:
+        return (envelope_decoded['identificacao'][1]['municipioZona']['municipio'], envelope_decoded['identificacao'][1]['municipioZona']['zona'], envelope_decoded['identificacao'][1]['secao'], bu_decoded['resultadosVotacaoPorEleicao'][0]['qtdEleitoresAptos'], bu_decoded['resultadosVotacaoPorEleicao'][0]['resultadosVotacao'][0]['totaisVotosCargo'][0]['votosVotaveis'])
+    else:
+        return (envelope_decoded['identificacao'][1]['municipioZona']['municipio'], envelope_decoded['identificacao'][1]['municipioZona']['zona'], envelope_decoded['identificacao'][1]['secao'], bu_decoded['resultadosVotacaoPorEleicao'][1]['qtdEleitoresAptos'], bu_decoded['resultadosVotacaoPorEleicao'][1]['resultadosVotacao'][0]['totaisVotosCargo'][0]['votosVotaveis'])
 
 def main():
 
@@ -50,9 +49,7 @@ def main():
     pleito = None
     files = []
 
-    if not os.path.exists(asn1_paths):
-        log(f"Arquivo {asn1_paths} não encontrado.")
-        exit(2)
+
 
     try:
         opts, args = getopt.getopt(sys.argv[1:],  "hu:p:", ["help", "uf=", "pleito="])
@@ -76,9 +73,19 @@ def main():
     if pleito is None:
         log('Necessário informar identificadores: pleito.')
         exit(2)
-        
+    
     files = glob.glob('./data/' + uf + '/**/**/**/o00' + pleito + '*.bu')
+    if len(files) > 0:
+        asn1_paths = 'doc/spec/bu.asn1'
+        print('Usando especificação V1')
+    else:
+        files += glob.glob('./data/' + uf + '/**/**/**/o00' + pleito + '*-bu.dat')
+        asn1_paths = 'docv2/spec/bu.asn1'
+        print('Usando especificação V2')
 
+    if not os.path.exists(asn1_paths):
+        log(f"Arquivo {asn1_paths} não encontrado.")
+        exit(2)
 
     log(f"Total de {len(files)} boletins de urna a serem processados")
 

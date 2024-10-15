@@ -1,0 +1,120 @@
+@startuml
+
+!include base.puml
+
+package Legenda {
+    class LegendaSequence   as "**Sequences**"              << (S, sequence) >>
+    class LegendaChoice     as "**Choices**"                << (C, choice) >>
+    class LegendaEnum       as "**Enums**"                  << (E, aenum) >>
+    class LegendaTipo       as "**Tipos simples**"          << (T, tipo) >>
+
+    LegendaSequence -[hidden]-> LegendaChoice
+    LegendaChoice -[hidden]-> LegendaEnum
+    LegendaEnum -[hidden]-> LegendaTipo
+}
+
+package Tipos {
+    class CodigoMunicipio          as "**CodigoMunicipio**"            << (T, tipo) >>
+    class DataHoraJE               as "**DataHoraJE**"                 << (T, tipo) >>
+    class IDEleicao                as "**IDEleicao**"                  << (T, tipo) >>
+    class IDPleito                 as "**IDPleito**"                   << (T, tipo) >>
+    class IDProcessoEleitoral      as "**IDProcessoEleitoral**"        << (T, tipo) >>
+    class NumeroCargoConsultaLivre as "**NumeroCargoConsultaLivre**"   << (T, tipo) >>
+    class NumeroInternoUrna        as "**NumeroInternoUrna**"          << (T, tipo) >>
+    class NumeroLocal              as "**NumeroLocal**"                << (T, tipo) >>
+    class NumeroPartido            as "**NumeroPartido**"              << (T, tipo) >>
+    class NumeroSecao              as "**NumeroSecao**"                << (T, tipo) >>
+    class NumeroSerieFlash         as "**NumeroSerieFlash**"           << (T, tipo) >>
+    class NumeroVotavel            as "**NumeroVotavel**"              << (T, tipo) >>
+    class NumeroZona               as "**NumeroZona**"                 << (T, tipo) >>
+    class QtdEleitores             as "**QtdEleitores**"               << (T, tipo) >>
+    class QuantidadeEscolhas       as "**QuantidadeEscolhas**"         << (T, tipo) >>
+    class VotoDigitado             as "**VotoDigitado**"               << (T, tipo) >>
+
+    CodigoMunicipio                -[hidden]-> DataHoraJE
+    DataHoraJE                     -[hidden]-> IDEleicao
+    IDEleicao                      -[hidden]-> IDPleito
+    IDProcessoEleitoral            -[hidden]-> NumeroCargoConsultaLivre
+    NumeroCargoConsultaLivre       -[hidden]-> NumeroInternoUrna
+    NumeroInternoUrna              -[hidden]-> NumeroLocal
+    NumeroPartido                  -[hidden]-> NumeroSecao
+    NumeroSecao                    -[hidden]-> NumeroSerieFlash
+    NumeroSerieFlash               -[hidden]-> NumeroVotavel
+    NumeroZona                     -[hidden]-> QtdEleitores
+    QtdEleitores                   -[hidden]-> QuantidadeEscolhas
+    QuantidadeEscolhas             -[hidden]-> VotoDigitado
+}
+
+class Legenda.LegendaSequence sequence_b
+class Legenda.LegendaChoice choice_b
+class Legenda.LegendaEnum aenum_b
+class Legenda.LegendaTipo tipo_b
+
+' Detalhes dos tipos
+
+class Tipos.CodigoMunicipio tipo_b {
+    INTEGER [1..99999]
+}
+
+class Tipos.DataHoraJE tipo_b {
+    GeneralString[15]
+    YYYYMMDDThhmmss
+}
+
+class Tipos.IDEleicao tipo_b {
+    INTEGER [0..99999]
+}
+
+class Tipos.IDPleito tipo_b {
+    INTEGER [0..99999]
+}
+
+class Tipos.IDProcessoEleitoral tipo_b {
+    INTEGER [0..99999]
+}
+
+class Tipos.NumeroCargoConsultaLivre tipo_b {
+    INTEGER [25..99]
+}
+
+class Tipos.NumeroInternoUrna tipo_b {
+    INTEGER [0..99999999]
+}
+
+class Tipos.NumeroLocal tipo_b {
+    INTEGER [1..9999]
+}
+
+class Tipos.NumeroPartido tipo_b {
+    INTEGER [0..99]
+}
+
+class Tipos.NumeroVotavel tipo_b {
+    INTEGER [0..99999]
+}
+
+class Tipos.NumeroSecao tipo_b {
+    INTEGER [1..9999]
+}
+
+class Tipos.NumeroSerieFlash tipo_b {
+    OCTET STRING [4]
+}
+
+class Tipos.NumeroZona tipo_b {
+    INTEGER [1..9999]
+}
+
+class Tipos.QtdEleitores tipo_b {
+    INTEGER [0..9999]
+}
+
+class Tipos.QuantidadeEscolhas tipo_b {
+    INTEGER [1..50]
+}
+
+class Tipos.VotoDigitado tipo_b {
+    NumericString [SIZE[1..5]]
+}
+
+@enduml

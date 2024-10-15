@@ -1,0 +1,21 @@
+@startuml
+
+left to right direction
+
+hide empty members
+
+!define aenum       #fa9441
+!define choice      #59b9de
+!define sequence    #21c834
+!define tipo        #c39deb
+!define aenum_b     #fce2c5
+!define choice_b    #c3ebfa
+!define sequence_b  #b7f5bd
+!define tipo_b      #ede3ff
+
+!define aenum_b_done     #e5220788
+!define choice_b_done    #e5220788
+!define sequence_b_done  #e5220788
+!define tipo_b_done      #e5220788
+
+@enduml

@@ -1,0 +1,352 @@
+@startuml
+
+!include base.puml
+
+Title "Estrutura do arquivo do RDV"
+
+class EntidadeResultadoRDV                  << (S, sequence) >>
+class EntidadeRegistroDigitalVoto           << (S, sequence) >>
+
+package Informacoes as "Informações auxiliares" {
+    class ApuracaoEletronica                    << (S, sequence) >>
+    class ApuracaoMistaBUAE                     << (S, sequence) >>
+    class ApuracaoMistaMR                       << (S, sequence) >>
+    class ApuracaoTotalmenteManualDigitacaoAE   << (S, sequence) >>
+    class CabecalhoEntidade                     << (S, sequence) >>
+    class Carga                                 << (S, sequence) >>
+    class CorrespondenciaResultado              << (S, sequence) >>
+    class Fase                                  << (E, aenum) >>
+    class IDEleitoral                           << (C, choice) >>
+    class IdentificacaoContingencia             << (S, sequence) >>
+    class IdentificacaoSecaoEleitoral           << (S, sequence) >>
+    class IdentificacaoUrna                     << (C, choice) >>
+    class IdentificadorGeradorMidia             << (C, sequence) >>
+    class MotivoApuracaoEletronica              << (E, aenum) >>
+    class MotivoApuracaoManual                  << (E, aenum) >>
+    class MotivoApuracaoMistaComBU              << (E, aenum) >>
+    class MotivoApuracaoMistaComMR              << (E, aenum) >>
+    class MunicipioZona                         << (S, sequence) >>
+    class TipoApuracao                          << (E, aenum) >>
+    class TipoApuracaoSA                        << (C, choice) >>
+    class TipoArquivo                           << (E, aenum) >>
+    class TipoUrna                              << (E, aenum) >>
+    class Urna                                  << (S, sequence) >>
+    <> TipoApuracao_diamond
+}
+
+package RDV {
+    class CargoConstitucional                   << (E, aenum) >>
+    class CodigoCargoConsulta                   << (C, choice) >>
+    class EleicaoSA                             << (S, sequence) >>
+    class EleicaoVota                           << (S, sequence) >>
+    class Eleicoes                              << (C, choice) >>
+    class OrigemVotosSA                         << (E, aenum) >>
+    class TipoCedulaSA                          << (E, aenum) >>
+    class TipoVoto                              << (E, aenum) >>
+    class Voto                                  << (S, sequence) >>
+    class VotosCargo                            << (S, sequence) >>
+}
+
+' Detalhes das entidades
+
+class Informacoes.ApuracaoEletronica sequence_b {
+    **tipoapuracao**
+    **motivoApuracao**
+}
+
+class Informacoes.ApuracaoMistaBUAE sequence_b {
+    **tipoapuracao**
+    **motivoApuracao**
+}
+
+class Informacoes.ApuracaoMistaMR sequence_b {
+    **tipoapuracao**
+    **motivoApuracao**
+}
+
+class Informacoes.ApuracaoTotalmenteManualDigitacaoAE sequence_b {
+    **tipoapuracao**
+    **motivoApuracao**
+}
+
+class Informacoes.CabecalhoEntidade sequence_b {
+    **dataGeracao** DataHoraJE
+    **idEleitoral**
+}
+
+class Informacoes.Carga sequence_b {
+    **numeroInternoUrna** NumeroInternoUrna
+    **numeroSerieFC** NumeroSeriFlash
+    **identificadorGeradorMidia**
+    **dataHoraCarga** DataHoraJE
+    **codigoCarga** GeneralString
+}
+
+class RDV.CargoConstitucional aenum_b {
+    **presidente** (1)
+    --**vicePresidente**-- (2)
+    **governador** (3)
+    --**viceGovernador**-- (4)
+    **senador** (5)
+    **deputadoFederal** (6)
+    **deputadoEstadual** (7)
+    **deputadoDistrital** (8)
+    --**primeiroSuplenteSenador**-- (9)
+    --**segundoSuplenteSenador**-- (10)
+    **prefeito** (11)
+    --**vicePrefeito**-- (12)
+    **vereador** (13)
+}
+
+class RDV.CodigoCargoConsulta choice_b {
+    **cargoConstitucional**
+    ..
+    **numeroCargoConsultaLivre** NumeroCargoConsultaLivre
+}
+
+class Informacoes.CorrespondenciaResultado sequence_b {
+    **identificacao**
+    **carga**
+}
+
+class RDV.EleicaoSA sequence_b {
+    **idEleicao** IDEleicao
+    **tipoCedulaSA**
+    **origemVotosSA**
+    **votosCargos**[]
+}
+
+class RDV.EleicaoVota sequence_b {
+    **idEleicao** IDEleicao
+    **votosCargos**[]
+}
+
+class RDV.Eleicoes choice_b {
+    **eleicoesVota**
+    ..
+    **eleicoesSA**
+}
+
+class EntidadeRegistroDigitalVoto sequence_b {
+    **pleito** IDPleito
+    **fase**
+    **identificacao**
+    **historicoCodigosCarga**[] GeneralString
+    **eleicoes**
+}
+
+class EntidadeResultadoRDV sequence_b {
+    **cabecalho**
+    **urna**
+    **rdv**
+}
+
+class Informacoes.Fase aenum_b {
+    **simulado** (1)
+    **oficial** (2)
+    **treinamento** (3)
+}
+
+class Informacoes.IDEleitoral choice_b {
+    --**idProcessoEleitoral**-- IDProcessoEleitoral
+    ..
+    **idPleito** IDPleito
+    ..
+    --**idEleicao**-- IDEleicao
+}
+
+class Informacoes.IdentificacaoContingencia sequence_b {
+    **municipioZona**
+}
+
+class Informacoes.IdentificacaoSecaoEleitoral sequence_b {
+    **municipioZona**
+    **local** NumeroLocal
+    **secao** NumeroSecao
+}
+
+class Informacoes.IdentificacaoUrna choice_b {
+    **identificacaoSecaoEleitoral**
+    ..
+    **identificacaoContingencia**
+}
+
+class Informacoes.IdentificadorGeradorMidia sequence_b {
+    **nome** GeneralString
+    **serialCertificadoTPM** GeneralString
+    **serialInstalacao** GeneralString
+}
+
+class Informacoes.MotivoApuracaoEletronica aenum_b {
+    **naoFoiPossivelReuperarResultado** (1)
+    **urnaNaoChegouMidiaDefeituosa** (2)
+    **urnaNaoChegouMidiaExtraviada** (3)
+    **outros** (99)
+}
+
+class Informacoes.MotivoApuracaoManual aenum_b {
+   **urnaComDefeito** (1)
+   **urnaIndisponivelInicio** (2)
+   **urnaOutraSecao** (3)
+   **outros** (99)
+}
+
+class Informacoes.MotivoApuracaoMistaComBU aenum_b {
+    **urnaDataHoraIncorreta** (1)
+    **urnaComDefeito** (2)
+    **urnaOutrasecao** (3)
+    **urnaPreparadaIncorretamente** (4)
+    **urnaChegouAposInicioVotacao** (5)
+    **outros**  (99)
+}
+
+class Informacoes.MotivoApuracaoMistaComMR aenum_b {
+   **naoObteveExitoContingencia** (1)
+   **indisponibilidadeUrnaContingencia** (2)
+   **indisponibilidadeFlashContingencia** (3)
+   **problemaEnergiaEletrica** (4)
+   **naoFoiPossivelTrocarUrna** (5)
+   **naoFoiSolicitadaTrocaUrna** (6)
+   **outros** (99)
+}
+
+class Informacoes.MunicipioZona sequence_b {
+    **municipio** CodigoMunicipio
+    **zona** NumeroZona
+}
+
+class RDV.OrigemVotosSA aenum_b {
+    **cedula** (1)
+    **rdv** (2)
+    **bu** (3)
+}
+
+class Informacoes.TipoApuracao aenum_b {
+    **totalmenteManual** (1)
+    **totalmenteEletronica** (2)
+    **mistaBU** (3)
+    **mistaMR** (4)
+}
+
+class Informacoes.TipoApuracaoSA choice_b {
+    **apuracaoMistaMR**
+    ..
+    **apuracaoMistaBUAE**
+    ..
+    **apuracaoTotalmenteManual**
+    ..
+    **apuracaoEletronica**
+}
+
+class Informacoes.TipoArquivo aenum_b {
+    **votacaoUE** (1)
+    **votacaoRED** (2)
+    **saMistaMRParcialCedula** (3)
+    **saMistaBUImpressoCedula** (4)
+    **saManual** (5)
+    **saEletronica** (6)
+}
+
+class Informacoes.TipoUrna aenum_b {
+    **secao** (1)
+    **contingencia** (3)
+    **reservaSecao** (4)
+    **reservaEncerrandoSecao** (6)
+}
+
+class RDV.TipoCedulaSA aenum_b {
+    **majoritario** (1)
+    **proporcional** (2)
+}
+
+class RDV.TipoVoto aenum_b {
+    **legenda** (1)
+    **nominal** (2)
+    **branco** (3)
+    **nulo** (4)
+    **brancoAposSuspensao** (5)
+    **nuloAposSuspensao** (6)
+    **nuloPorRepeticao** (7)
+    **nuloCargoSemCandidato** (8)
+    **nuloAposSuspensaoCargoSemCandidato** (9)
+}
+
+class Informacoes.Urna sequence_b {
+    **tipoUrna**
+    **versaoVotacao** GeneralString
+    **correspondenciaResultado**
+    **tipoArquivo**
+    **numeroSerieFV** NumeroSerieFlash
+    **motivoUtilizacaoSA** OPTIONAL
+}
+
+class RDV.Voto sequence_b {
+    **tipoVoto**
+    **digitacao** VotoDigitado OPTIONAL
+}
+
+class RDV.VotosCargo sequence_b {
+    **idCargo**
+    **quantidadeEscolhas** QuantidadeEscolhas
+    **votos**[]
+}
+
+ApuracaoEletronica *--> MotivoApuracaoEletronica: motivoApuracao
+ApuracaoEletronica *--> TipoApuracao_diamond
+ApuracaoMistaBUAE *--> MotivoApuracaoMistaComBU: motivoApuracao
+ApuracaoMistaBUAE *--> TipoApuracao_diamond
+ApuracaoMistaMR *--> MotivoApuracaoMistaComMR: motivoApuracao
+ApuracaoMistaMR *--> TipoApuracao_diamond
+ApuracaoTotalmenteManualDigitacaoAE *--> MotivoApuracaoManual: motivoApuracao
+ApuracaoTotalmenteManualDigitacaoAE *--> TipoApuracao_diamond
+TipoApuracao_diamond --> TipoApuracao: tipoApuracao
+
+CabecalhoEntidade *--> IDEleitoral: idEleitoral
+
+Carga *--> IdentificadorGeradorMidia: identificadorGeradorMidia
+
+CodigoCargoConsulta::cargoConstitucional --> CargoConstitucional
+
+CorrespondenciaResultado *--> IdentificacaoUrna: identificacao
+CorrespondenciaResultado *--> Carga: carga
+
+EleicaoSA *--> TipoCedulaSA: tipoCedulaSA
+EleicaoSA *--> OrigemVotosSA: origemVotosSA
+EleicaoSA *-->"*" VotosCargo: votosCargos
+
+EleicaoVota *-->"*" VotosCargo: votosCargos
+
+Eleicoes::eleicoesVota *-->"*" EleicaoVota
+Eleicoes::eleicoesSA *-->"*" EleicaoSA
+
+EntidadeRegistroDigitalVoto *--> Fase: fase
+EntidadeRegistroDigitalVoto *--> IdentificacaoSecaoEleitoral: identificacao
+EntidadeRegistroDigitalVoto *--> Eleicoes: eleicoes
+
+EntidadeResultadoRDV *--> CabecalhoEntidade: cabecalho
+EntidadeResultadoRDV *--> Urna: urna
+EntidadeResultadoRDV *--> EntidadeRegistroDigitalVoto: rdv
+
+IdentificacaoContingencia *--> MunicipioZona: municipioZona
+
+IdentificacaoSecaoEleitoral *--> MunicipioZona: municipioZona
+
+IdentificacaoUrna::identificacaoSecaoEleitoral --> IdentificacaoSecaoEleitoral
+IdentificacaoUrna::identificacaoContingencia --> IdentificacaoContingencia
+
+TipoApuracaoSA::apuracaoEletronica --> ApuracaoEletronica
+TipoApuracaoSA::apuracaoMistaBUAE --> ApuracaoMistaBUAE
+TipoApuracaoSA::apuracaoMistaMR --> ApuracaoMistaMR
+TipoApuracaoSA::apuracaoTotalmenteManual --> ApuracaoTotalmenteManualDigitacaoAE
+
+Urna *--> TipoUrna: tipoUrna
+Urna *--> CorrespondenciaResultado: correspondenciaResultado
+Urna *--> TipoArquivo: tipoArquivo
+Urna o--> TipoApuracaoSA: motivoUtilizacaoSA
+
+Voto *--> TipoVoto: tipoVoto
+
+VotosCargo *-->"*" Voto: votos
+VotosCargo *--> CodigoCargoConsulta: idCargo
+
+@enduml
