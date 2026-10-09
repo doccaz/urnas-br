@@ -334,6 +334,33 @@ onde temos, na sequência:
 os votos brancos e nulos aparecem como um "candidato" também.
 
 
+## Parâmetros adicionais para processamento
+
+Os scripts `processa_bu_csv.py` e `processa_bu_divergentes_csv.py` aceitam parâmetros opcionais:
+
+| Parâmetro | Descrição | Padrão |
+|-----------|-----------|--------|
+| `-d` / `--data-dir` | Diretório dos arquivos .bu | `./data` |
+| `--json-dir` | Diretório dos JSONs de municípios | `./json` |
+| `-o` / `--output` | Arquivo CSV de saída | `resumo-<uf>-<pleito>.csv` |
+
+### Exemplos de uso
+
+Processar de diretório customizado:
+```bash
+./processa_bu_csv.py -u sp -p 406 --data-dir=/dados/urnas --json-dir=/dados/json -o resultado.csv
+```
+
+Comportamento original (sem parâmetros):
+```bash
+./processa_bu_csv.py -u sp -p 406
+```
+
+### Nota sobre processa_bu_divergentes_csv.py
+
+Este script processa apenas arquivos no formato V1 (eleições 2022). Para eleições 2024+, utilize `processa_bu_csv.py` que suporta V1 e V2.
+
+
 # Bônus: Relação de candidatos e resultados simplificados de cada estado
 
 URL de exemplo: https://resultados.tse.jus.br/oficial/ele2022/546/dados-simplificados/ap/ap-c0007-e000546-r.json

@@ -19,6 +19,9 @@ def exibe_ajuda():
     print('Uso: ')
     print('\t-u|--uf=<estado>\t\tEstado a processar')
     print('\t-p|--pleito=<id do pleito>\t\t\tIdentificador do Pleito (ex: 406)')
+    print('\t-d|--data-dir=<caminho>\t\tDiretório dos dados (padrão: ./data)')
+    print('\t--json-dir=<caminho>\t\tDiretório dos arquivos JSON (padrão: ./json)')
+    print('\t-o|--output=<arquivo>\t\tArquivo de saída (padrão: resumo-<uf>-<pleito>.csv)')
     print('\t-h|--help\t\tExibe a ajuda')
     return
 
@@ -48,11 +51,14 @@ def main():
     resultados = None
     pleito = None
     files = []
+    data_dir = './data'
+    json_dir = './json'
+    output_file = None
 
 
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:],  "hu:p:", ["help", "uf=", "pleito="])
+        opts, args = getopt.getopt(sys.argv[1:], "hu:p:d:o:", ["help", "uf=", "pleito=", "data-dir=", "json-dir=", "output="])
     except getopt.GetoptError as err:
         log(err)
         exibe_ajuda()
@@ -66,6 +72,12 @@ def main():
             uf = a
         elif o in ("-p", "--pleito"):
             pleito = a
+        elif o in ("-d", "--data-dir"):
+            data_dir = a
+        elif o == "--json-dir":
+            json_dir = a
+        elif o in ("-o", "--output"):
+            output_file = a
     if uf is None:
         exibe_ajuda()
         exit(1)
@@ -73,13 +85,16 @@ def main():
     if pleito is None:
         log('Necessário informar identificadores: pleito.')
         exit(2)
+
+    if output_file is None:
+        output_file = f'resumo-{uf}-{pleito}.csv'
     
-    files = glob.glob('./data/' + uf + '/**/**/**/o00' + pleito + '*.bu')
+    files = glob.glob(os.path.join(data_dir, uf, '**/**/**', f'o00{pleito}*.bu'))
     if len(files) > 0:
         asn1_paths = 'doc/spec/bu.asn1'
         print('Usando especificação V1')
     else:
-        files += glob.glob('./data/' + uf + '/**/**/**/o00' + pleito + '*-bu.dat')
+        files += glob.glob(os.path.join(data_dir, uf, '**/**/**', f'o00{pleito}*-bu.dat'))
         asn1_paths = 'docv2/spec/bu.asn1'
         print('Usando especificação V2')
 
@@ -91,14 +106,14 @@ def main():
 
 
     # carrega dados de municípios
-    with open('./json/' + uf + '-p000' + pleito + '-cs.json', "r") as f:
+    with open(os.path.join(json_dir, f'{uf}-p000{pleito}-cs.json'), "r") as f:
         dados_estado = json.loads(f.read())
         data = dados_estado['abr'][0]
         log(f"total de {len(data['mu'])} municípios para ({data['ds']} - {data['cd']})")
         
     count=1
     
-    with open('resumo-' + uf + '-' + pleito + '.csv', 'w') as f:
+    with open(output_file, 'w') as f:
         f.write(f"\"UF\",\"cod_municipio\",\"municipio\",\"zona\",\"secao\",\"eleitores_aptos\",\"candidato\",\"quantidade_votos\"\n")
         for bu in files:
             log(f"[{count}/{len(files)}] processando {bu}")
