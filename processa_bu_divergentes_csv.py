@@ -8,8 +8,6 @@ import asn1tools
 import sys
 import os
 
-asn1_paths = 'doc/spec/bu.asn1'
-
 # funcao de log
 
 
@@ -23,6 +21,9 @@ def exibe_ajuda():
     print('Uso: ')
     print('\t-u|--uf=<estado>\t\tEstado a processar')
     print('\t-p|--pleito=<id do pleito>\t\t\tIdentificador do Pleito (ex: 406)')
+    print('\t-d|--data-dir=<diretório>\t\tDiretório com arquivos .bu (padrão: ./data)')
+    print('\t--json-dir=<diretório>\t\tDiretório com arquivos JSON (padrão: ./json)')
+    print('\t-o|--output=<arquivo>\t\tArquivo CSV de saída (padrão: resumo-divergentes-<uf>-<pleito>.csv)')
     print('\t-h|--help\t\tExibe a ajuda')
     return
 
@@ -52,13 +53,12 @@ def main():
     resultados = None
     pleito = None
     files = []
-
-    if not os.path.exists(asn1_paths):
-        log(f"Arquivo {asn1_paths} não encontrado.")
-        exit(2)
+    data_dir = './data'
+    json_dir = './json'
+    output_file = None
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:],  "hu:p:", ["help", "uf=", "pleito="])
+        opts, args = getopt.getopt(sys.argv[1:], "hu:p:d:o:", ["help", "uf=", "pleito=", "data-dir=", "json-dir=", "output="])
     except getopt.GetoptError as err:
         log(err)
         exibe_ajuda()
@@ -72,30 +72,48 @@ def main():
             uf = a
         elif o in ("-p", "--pleito"):
             pleito = a
+        elif o in ("-d", "--data-dir"):
+            data_dir = a
+        elif o == "--json-dir":
+            json_dir = a
+        elif o in ("-o", "--output"):
+            output_file = a
 
     if uf is None:
         exibe_ajuda()
         exit(1)
-    
+
     if pleito is None:
         log('Necessário informar identificadores: pleito.')
         exit(2)
-        
-    files = glob.glob('./data/' + uf + '/**/**/**/o00' + pleito + '*.bu')
 
+    if output_file is None:
+        output_file = f'resumo-divergentes-{uf}-{pleito}.csv'
+
+    files = glob.glob(os.path.join(data_dir, uf, '**', '**', '**', 'o00' + pleito + '*.bu'))
+
+    asn1_paths = 'doc/spec/bu.asn1'
+
+    if len(files) == 0:
+        log("Nenhum arquivo .bu encontrado. Para eleicoes 2024+, use processa_bu_csv.py que suporta formato V2.")
+        exit(1)
+
+    if not os.path.exists(asn1_paths):
+        log(f"Arquivo {asn1_paths} não encontrado.")
+        exit(2)
 
     log(f"Total de {len(files)} boletins de urna a serem processados")
 
 
     # carrega dados de municípios
-    with open('./json/' + uf + '-p000' + pleito + '-cs.json', "r") as f:
+    with open(os.path.join(json_dir, uf + '-p000' + pleito + '-cs.json'), "r") as f:
         dados_estado = json.loads(f.read())
         data = dados_estado['abr'][0]
         log(f"total de {len(data['mu'])} municípios para ({data['ds']} - {data['cd']})")
-        
-    count=1
-    
-    with open('resumo-divergentes-' + uf + '-' + pleito + '.csv', 'w') as f:
+
+    count = 1
+
+    with open(output_file, 'w') as f:
         f.write(f"\"UF\",\"cod_municipio\",\"municipio\",\"zona\",\"secao\",\"aptos_presidente\",\"total_votos_presidente\",\"aptos_deputado_federal\",\"total_deputado_federal\"\n")
         for bu in files:
             log(f"[{count}/{len(files)}] processando {bu}")
@@ -107,12 +125,12 @@ def main():
                 log(f"voto invalido: {bu}")
                 continue
             text = ''
-            
+
             log(f"---> aptos presidente: {aptos_presidente}, presidente: {total_presidente}, aptos deputado federal: {aptos_deputado_federal}, deputado federal: {total_deputado_federal}")
             if aptos_presidente > aptos_deputado_federal:
                 log(f"******** DIVERGÊNCIA: {[m for m in data['mu'] if m['cd'] == str(municipio).zfill(5)][0]['nm']} - {uf} ZONA: {str(zona).zfill(5)} SEÇÃO: {str(secao).zfill(4)}, {aptos_presidente} eleitores aptos para presidente versus {aptos_deputado_federal} para deputado federal!")
                 f.write(f"{uf},{municipio},\"{[m for m in data['mu'] if m['cd'] == str(municipio).zfill(5)][0]['nm']}\",{str(zona).zfill(5)},{str(secao).zfill(4)},{aptos_presidente},{str(total_presidente)},{str(aptos_deputado_federal)},{str(total_deputado_federal)}\n")
-                
+
             # for voto in votos:
             #     if voto['tipoVoto'] == 'nominal':
             #         text = str(voto['identificacaoVotavel']['partido']) + ',' + str(voto['quantidadeVotos'])
@@ -129,9 +147,9 @@ def main():
             #         log(f"---> adicionando {str(voto['quantidadeVotos'])} votos BRANCOS ao total da seção")
             #         total_votos_brancos = voto['quantidadeVotos']
             #         total_votos_secao += voto['quantidadeVotos']
-            # log(f"total de {total_votos_secao} votos nesta seção. Aptos: {eleitores_aptos}")            
+            # log(f"total de {total_votos_secao} votos nesta seção. Aptos: {eleitores_aptos}")
             # if total_votos_secao > eleitores_aptos:
-            count+=1
+            count += 1
     f.close()
     log(f"UF {uf} concluída com sucesso.")
 
